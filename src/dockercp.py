@@ -1,7 +1,9 @@
+# -*- coding: utf-8 -*-
 #!/usr/bin/env python3
 
 import argparse
 import os
+import sys
 from io import BytesIO
 import docker
 import tarfile
@@ -11,7 +13,7 @@ DEFAULT_BUFFER_LENGTH = 4
 
 class DockerCopy(object):
     def __dprint(self, msg=None):
-        if msg and self.args.debug:
+        if self.args and msg and self.args.debug:
             print("DEBUG: ", msg)
 
     def __validate_path(self):
@@ -38,16 +40,19 @@ class DockerCopy(object):
         self.__dprint("Validating paths... OK")
         return res['ret_src'] and res['ret_dest']
 
-    def __init__(self):
-        """Initialize DockerCopy object, getting and validate aruments"""
-
+    def parse_args(self, args):
         parser = argparse.ArgumentParser(description=("Copy files from/to Docker containers"))
         parser.add_argument("-d", "--debug", dest="debug", type=bool, default=False, help="Enable debug info")
         parser.add_argument("-b", "--buffer-length", dest="buffer_length", type=int, default=DEFAULT_BUFFER_LENGTH,
                             help="Specify the buffer length (bytes)")
         parser.add_argument("src", type=str, help=("Source."))
         parser.add_argument("dest", type=str, help=("Destination."))
-        self.args = parser.parse_args()
+        return parser.parse_args(args)
+
+    def __init__(self, argsv=None):
+        """Initialize DockerCopy object, getting and validate aruments"""
+
+        self.args = self.parse_args(argsv)
 
         if not self.__validate_path():
             print("Something is wrong on your paths...")
@@ -105,7 +110,8 @@ class DockerCopy(object):
 
 
 if __name__ == "__main__":
-    dockercp = DockerCopy()
+    dockercp = DockerCopy(sys.argv[1:])
+
     if dockercp.copy():
         print("Success Copy!")
     else:
