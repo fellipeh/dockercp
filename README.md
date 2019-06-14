@@ -14,3 +14,7 @@ To test:
 `$ python3 dockercp.py --bufer-length=4 test:/etc/fedora-release .` 
 
 `$ cat ./fedora-release ` 
+
+- To run the tests
+
+`$ make test`
